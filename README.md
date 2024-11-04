@@ -321,6 +321,67 @@ Content-Length: 19
 
 Guide added to trip
 
+--------------------------
+
+GET http://localhost:7070/api/trips/guides/3
+
+HTTP/1.1 200 OK
+Date: Mon, 04 Nov 2024 11:50:43 GMT
+Content-Type: application/json
+Content-Length: 530
+
+```json
+[
+{
+"id": 7,
+"startTime": [
+10,
+0
+],
+"endTime": [
+16,
+0
+],
+"startPosition": "Tatras",
+"name": "Hiking",
+"price": 150.99,
+"category": "FOREST",
+"guide": {
+"id": 3,
+"firstName": "Maria",
+"lastName": "Garcia",
+"email": "guidemaria@localtours",
+"phone": "9862048576",
+"yearsOfExperience": 10,
+"trips": []
+}
+},
+{
+"id": 3,
+"startTime": [
+8,
+0
+],
+"endTime": [
+20,
+0
+],
+"startPosition": "Zakopane",
+"name": "Skiing",
+"price": 300.99,
+"category": "SNOW",
+"guide": {
+"id": 3,
+"firstName": "Maria",
+"lastName": "Garcia",
+"email": "guidemaria@localtours",
+"phone": "9862048576",
+"yearsOfExperience": 10,
+"trips": []
+}
+}
+]
+```
 
 ### Task 3.3.5 - Why do we suggest a PUT method for adding a guide to a trip instead of a POST method?
 Fordi vi gerne vil opdatere en eksisterende trip, og ikke oprette en ny trip. 

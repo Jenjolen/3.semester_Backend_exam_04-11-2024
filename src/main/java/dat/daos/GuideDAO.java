@@ -1,8 +1,6 @@
 package dat.daos;
 
-import dat.dtos.DoctorDTO;
 import dat.dtos.GuideDTO;
-import dat.entities.Doctor;
 import dat.entities.Guide;
 import dat.entities.Trip;
 import jakarta.persistence.EntityManager;

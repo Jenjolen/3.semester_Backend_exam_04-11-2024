@@ -1,11 +1,8 @@
 package dat.daos;
 
-import dat.dtos.DoctorDTO;
-import dat.dtos.GuideDTO;
 import dat.dtos.TripDTO;
 import dat.entities.Trip;
 import dat.entities.Guide;
-import dat.entities.Trip;
 import dat.security.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -86,18 +83,29 @@ public class TripDAO implements iDAO<TripDTO, Integer>, ITripGuideDAO {
     }
 
     @Override
-    public TripDTO delete(Integer integer) {
-        try (EntityManager em = emf.createEntityManager()) {
+    public TripDTO delete(Integer id) throws ApiException {
+        EntityManager em = emf.createEntityManager();
+        try {
             em.getTransaction().begin();
-            Trip trip = em.find(Trip.class, integer);
+            Trip trip = em.find(Trip.class, id);
             if (trip == null) {
-                throw new ApiException(404, "Trip does not exist");
+                em.getTransaction().rollback();
+                throw new ApiException(404, "Trip not found");
             }
             em.remove(trip);
             em.getTransaction().commit();
             return new TripDTO(trip);
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            e.printStackTrace(); // Log the exception
+            throw e;
+        } finally {
+            em.close();
         }
     }
+
+
+
 
     @Override
     public void addGuideToTrip(int tripId, int guideId) {

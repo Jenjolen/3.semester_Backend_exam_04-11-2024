@@ -1,8 +1,8 @@
 package dat.routes;
 
 
-import dat.controllers.DoctorControllerDB;
 import dat.controllers.TripController;
+import dat.security.enums.Role;
 import io.javalin.apibuilder.EndpointGroup;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
@@ -15,13 +15,17 @@ public class TripRoutes {
 
         return () -> {
 
-            post("/populate", tripController::populate);
-            get("/", tripController::getAll);
-            get("/{id}", tripController::getById);
-            post("/", tripController::create);
-            put("/{id}", tripController::update);
-            delete("/{id}", tripController::delete);
-            put("/{tripId}/guides/{guideId}", tripController::addGuideToTrip);
+            post("/populate", tripController::populate, Role.ANYONE);
+            get("/category/{category}", tripController::getTripsByCategory, Role.ANYONE);
+            get("/", tripController::getAll, Role.ANYONE);
+            get("/{id}", tripController::getById, Role.ANYONE);
+            post("/", tripController::create, Role.USER, Role.ADMIN);
+            put("/{id}", tripController::update, Role.ADMIN);
+            delete("/{id}", tripController::delete, Role.ADMIN);
+            get("/guides/totalprice", tripController::getGuidesTotalPrice, Role.ADMIN);
+            put("/{tripId}/guides/{guideId}", tripController::addGuideToTrip, Role.ADMIN);
+            get("/guides/{guideId}", tripController::getTripsByGuide, Role.ANYONE);
+
 
 
         };

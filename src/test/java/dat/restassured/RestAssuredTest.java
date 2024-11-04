@@ -2,65 +2,58 @@ package dat.restassured;
 
 import dat.config.ApplicationConfig;
 import dat.config.HibernateConfig;
-
 import dat.config.Populator;
-
-import dat.controllers.DoctorControllerDB;
-import dat.dtos.DoctorDTO;
-import dat.entities.Appointment;
-import dat.entities.Doctor;
-import dat.enums.Specialty;
+import dat.controllers.TripController;
+import dat.daos.TripDAO;
+import dat.dtos.GuideDTO;
+import dat.dtos.GuideTotalPriceDTO;
+import dat.dtos.TripDTO;
+import dat.enums.Category;
 import io.javalin.Javalin;
 import io.restassured.common.mapper.TypeRef;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.*;
 
-import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RestAssuredTest {
 
-    private final static EntityManagerFactory emf = HibernateConfig.getEntityManagerFactoryForTest();
-    private static DoctorDAO doctorDAO = DoctorDAO.getInstance(emf);
-    private static DoctorControllerDB doctorControllerDB = new DoctorControllerDB();
+    private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactoryForTest();
+    private static final TripDAO tripDAO = TripDAO.getInstance(emf);
+    private static final TripController tripController = new TripController();
     private static Javalin app;
-    private static List<Doctor> doctors;
-    private static Doctor doctor1, doctor2, doctor3, doctor4, doctor5, doctor6, doctor7;
-    private static List<Appointment> appointments;
-    private static Appointment appointment1, appointment2, appointment3, appointment4, appointment5, appointment6, appointment7, appointment8, appointment9, appointment10, appointment11, appointment12, appointment13, appointment14;
 
-    private static final String BASE_URL = "http://localhost:7070/api";
+    private static final String BASE_URL = "http://localhost:7070/api/trips";
 
     @BeforeAll
     void setUpAll() {
         HibernateConfig.setTest(true);
-
-        // Start api
+        // Start the API
         app = ApplicationConfig.startServer(7070);
     }
 
     @BeforeEach
     void setUp() {
-        // Populate the database with hotels and rooms
-        System.out.println("Populating database with doctors and appointments");
+        System.out.println("Populating database with trips and guides");
         Populator populator = new Populator();
         populator.populate();
-
-
     }
 
     @AfterEach
     void tearDown() {
         try (EntityManager em = emf.createEntityManager()){
             em.getTransaction().begin();
-            em.createQuery("DELETE FROM Appointment ").executeUpdate();
-            em.createQuery("DELETE FROM Doctor ").executeUpdate();
+            em.createQuery("DELETE FROM Trip").executeUpdate();
+            em.createQuery("DELETE FROM Guide").executeUpdate();
             em.getTransaction().commit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,154 +66,208 @@ class RestAssuredTest {
     }
 
     @Test
-    void readAll() {
-
-        List<DoctorDTO> doctorDTOS =
-                given()
-                        .when()
-                        .get(BASE_URL + "/doctors")
-                        .then()
-                        .statusCode(200)
-                        .body("size()", is(7))
-                        .log().all()
-                        .extract()
-                        .as(new TypeRef<List<DoctorDTO>>() {});
-
-        assertThat(doctorDTOS.size(), is(7));
-
-        assertThat(doctorDTOS.get(0).getName(), is("Dr. Alice Smith"));
-        assertThat(doctorDTOS.get(1).getName(), is("Dr. Bob Johnson"));
-        assertThat(doctorDTOS.get(2).getName(), is("Dr. Clara Lee"));
-        assertThat(doctorDTOS.get(3).getName(), is("Dr. David Park"));
-        assertThat(doctorDTOS.get(4).getName(), is("Dr. Emily White"));
-        assertThat(doctorDTOS.get(5).getName(), is("Dr. Fiona Martinez"));
-        assertThat(doctorDTOS.get(6).getName(), is("Dr. George Kim"));
-    }
-
-    @Test
-    void populate() {
+    void testPopulate() {
         String responseBody =
                 given()
                         .when()
-                        .get(BASE_URL + "/doctors/populate")
+                        .post(BASE_URL + "/populate")
                         .then()
                         .statusCode(201)
                         .log().all()
                         .extract()
                         .asString();
 
-        assertThat(responseBody, is("Database populated"));
+        assertEquals("Database populated", responseBody);
     }
 
-
-
-
     @Test
-    void readOneDoctor() {
-        DoctorDTO doctorDTO =
+    void testGetAllTrips() {
+        List<TripDTO> tripDTOS =
                 given()
-                        .pathParam("id", 1)
                         .when()
-                        .get(BASE_URL + "/doctors/{id}")
+                        .get(BASE_URL + "/")
                         .then()
                         .statusCode(200)
                         .log().all()
                         .extract()
-                        .as(DoctorDTO.class);
+                        .as(new TypeRef<List<TripDTO>>() {});
 
-        assertThat(doctorDTO.getName(), is("Dr. Alice Smith"));
+        assertEquals(7, tripDTOS.size());
     }
 
     @Test
-    void doctorBySpecialty() {
-        List<DoctorDTO> doctorDTOS =
+    void testGetTripById() {
+        TripDTO trip =
                 given()
-                        .pathParam("specialty", "FAMILY_MEDICINE")
                         .when()
-                        .get(BASE_URL + "/doctors/specialty/{specialty}")
+                        .get(BASE_URL + "/1")
                         .then()
                         .statusCode(200)
                         .log().all()
                         .extract()
-                        .as(new TypeRef<List<DoctorDTO>>() {});
+                        .as(TripDTO.class);
 
-        assertThat(doctorDTOS.size(), is(2));
-
-        assertThat(doctorDTOS.get(0).getName(), is("Dr. Alice Smith"));
-        assertThat(doctorDTOS.get(1).getName(), is("Dr. George Kim"));
+        assertNotNull(trip);
+        assertEquals(1, trip.getId());
+        assertEquals("Budapest", trip.getStartPosition());
     }
 
     @Test
-    void doctorByBirthdateRange() {
-        List<DoctorDTO> doctorDTOS =
-                given()
-                        .queryParam("from", "1980-01-01")
-                        .queryParam("to", "1985-01-01")
-                        .when()
-                        .get(BASE_URL + "/doctors/birthdate/range")
-                        .then()
-                        .statusCode(200)
-                        .log().all()
-                        .extract()
-                        .as(new TypeRef<List<DoctorDTO>>() {});
+    void testCreateTrip() {
+        TripDTO newTrip = new TripDTO();
+        newTrip.setStartTime(LocalTime.of(11, 0));
+        newTrip.setEndTime(LocalTime.of(19, 0));
+        newTrip.setStartPosition("Seoul");
+        newTrip.setName("Hongdae Shopping");
+        newTrip.setPrice(240.59);
+        newTrip.setCategory(Category.CITY);
 
-        assertThat(doctorDTOS.size(), is(3));
-
-        assertThat(doctorDTOS.get(0).getName(), is("Dr. Bob Johnson"));
-        assertThat(doctorDTOS.get(1).getName(), is("Dr. Clara Lee"));
-        assertThat(doctorDTOS.get(2).getName(), is("Dr. Emily White"));
-
-    }
-
-
-
-
-    @Test
-    void createDoctor() {
-        DoctorDTO doctorDTO = new DoctorDTO("Dr. Namjoon Kim", LocalDate.of(1994, 9, 12), 2020, "Bangtan Lab", Specialty.SURGERY);
-
-        DoctorDTO createdDoctor =
+        TripDTO createdTrip =
                 given()
                         .contentType("application/json")
-                        .body(doctorDTO)
+                        .body(newTrip)
                         .when()
-                        .post(BASE_URL + "/doctors")
+                        .post(BASE_URL + "/")
                         .then()
                         .statusCode(201)
                         .log().all()
                         .extract()
-                        .as(DoctorDTO.class);
+                        .as(TripDTO.class);
 
-        assertThat(createdDoctor.getName(), is("Dr. Namjoon Kim"));
+        assertNotNull(createdTrip);
+        assertNotNull(createdTrip.getId());
+        assertEquals("Seoul", createdTrip.getStartPosition());
     }
 
     @Test
-    void updateDoctor() {
+    void testUpdateTrip() {
+        TripDTO updatedTrip = new TripDTO();
+        updatedTrip.setStartTime(LocalTime.of(21, 0));
+        updatedTrip.setEndTime(LocalTime.of(23, 0));
+        updatedTrip.setStartPosition("Reykjavik");
+        updatedTrip.setName("Spotting Northern Lights");
+        updatedTrip.setPrice(300.59);
+        updatedTrip.setCategory(Category.FOREST);
 
-        DoctorDTO fetchedDoctor = doctorDAO.read(1);
-        fetchedDoctor.setSpecialty(Specialty.SURGERY);
-        fetchedDoctor.setDateOfBirth(LocalDate.of(1994, 9, 12));
-        fetchedDoctor.setYearOfGraduation(2020);
-        fetchedDoctor.setNameOfClinic("Bangtan Lab");
-
-        DoctorDTO updatedDoctor =
+        TripDTO responseTrip =
                 given()
-                        .pathParam("id", 1)
                         .contentType("application/json")
-                        .body(fetchedDoctor)
+                        .body(updatedTrip)
                         .when()
-                        .put(BASE_URL + "/doctors/{id}")
+                        .put(BASE_URL + "/1")
                         .then()
                         .statusCode(200)
                         .log().all()
                         .extract()
-                        .as(DoctorDTO.class);
+                        .as(TripDTO.class);
 
-        assertThat(updatedDoctor.getSpecialty(), is(Specialty.SURGERY));
-        assertThat(updatedDoctor.getDateOfBirth(), is(LocalDate.of(1994, 9, 12)));
-        assertThat(updatedDoctor.getYearOfGraduation(), is(2020));
-        assertThat(updatedDoctor.getNameOfClinic(), is("Bangtan Lab"));
+        assertNotNull(responseTrip);
+        assertEquals("Reykjavik", responseTrip.getStartPosition());
+        assertEquals("Spotting Northern Lights", responseTrip.getName());
+    }
+
+    @Test
+    void testDeleteTrip() {
+        String response =
+                given()
+                        .when()
+                        .delete(BASE_URL + "/3")
+                        .then()
+                        .statusCode(200)
+                        .log().all()
+                        .extract()
+                        .asString();
+
+        assertEquals("Trip deleted", response);
+    }
+
+    @Test
+    void testAddGuideToTrip() {
+        // Assuming trip with id=1 and guide with id=1 exist
+        String response =
+                given()
+                        .when()
+                        .put(BASE_URL + "/1/guides/1")
+                        .then()
+                        .statusCode(200)
+                        .log().all()
+                        .extract()
+                        .asString();
+
+        assertEquals("Guide added to trip", response);
+
+        // Verify that the guide is added to the trip
+        TripDTO trip =
+                given()
+                        .when()
+                        .get(BASE_URL + "/1")
+                        .then()
+                        .statusCode(200)
+                        .extract()
+                        .as(TripDTO.class);
+
+        assertNotNull(trip.getGuide());
+        assertEquals(1, trip.getGuide().getId());
+    }
+
+    @Test
+    void testGetGuidesTotalPrice() {
+        List<GuideTotalPriceDTO> guides =
+                given()
+                        .when()
+                        .get(BASE_URL + "/guides/totalprice")
+                        .then()
+                        .statusCode(200)
+                        .log().all()
+                        .extract()
+                        .as(new TypeRef<List<GuideTotalPriceDTO>>() {});
+
+        assertNotNull(guides);
+        assertTrue(guides.size() > 0);
+
 
     }
 
+    @Test
+    void testGetTripsByGuide() {
+        Set<TripDTO> trips =
+                given()
+                        .when()
+                        .get(BASE_URL + "/guides/1")
+                        .then()
+                        .statusCode(200)
+                        .log().all()
+                        .extract()
+                        .as(new TypeRef<Set<TripDTO>>() {});
+
+        assertNotNull(trips);
+        assertTrue(trips.size() > 0);
+
+        // Ensure that all trips belong to guide with ID 1
+        for (TripDTO trip : trips) {
+            assertNotNull(trip.getGuide());
+            assertEquals(1, trip.getGuide().getId());
+        }
+    }
+
+    @Test
+    void testGetTripsByCategory() {
+        Set<TripDTO> trips =
+                given()
+                        .when()
+                        .get(BASE_URL + "/category/CITY")
+                        .then()
+                        .statusCode(200)
+                        .log().all()
+                        .extract()
+                        .as(new TypeRef<Set<TripDTO>>() {});
+
+        assertNotNull(trips);
+        assertTrue(trips.size() > 0);
+
+        // Ensure that all trips have category CITY
+        for (TripDTO trip : trips) {
+            assertEquals(Category.CITY, trip.getCategory());
+        }
+    }
 }

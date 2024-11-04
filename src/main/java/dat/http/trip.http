@@ -58,3 +58,15 @@ Accept: application/json
 PUT {{url}}/trips/8/guides/4
 Accept: application/json
 ###
+
+GET {{url}}/trips/guides/3
+Accept: application/json
+###
+
+GET {{url}}/trips/category/CITY
+Accept: application/json
+###
+
+GET {{url}}/trips/guides/totalprice
+Accept: application/json
+###
