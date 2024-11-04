@@ -6,11 +6,12 @@ import static io.javalin.apibuilder.ApiBuilder.*;
 
 public class Routes {
 
-    private final DoctorRoutes doctorRoutes = new DoctorRoutes();
+    private final TripRoutes tripRoutes = new TripRoutes();
 
     public EndpointGroup getRoutes() {
         return () -> {
-            path("/doctors", doctorRoutes.getRoutes());
+            path("/trips", tripRoutes.getRoutes());
+
 
 
         };

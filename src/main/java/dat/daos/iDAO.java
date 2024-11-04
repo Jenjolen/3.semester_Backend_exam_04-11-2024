@@ -2,10 +2,11 @@ package dat.daos;
 
 import java.util.List;
 
-public interface iDAO <T, I> {
-    T read(I i);
-    List<T> readAll();
-    T create(T t);
-    T update(I i, T t);
+public interface iDAO <DTO, I> { // jeg forstod det med at returtypen skulle være DTO således - nu hvor det skulle være generic
+    DTO getById(I i);
+    List<DTO> getAll();
+    DTO create(DTO dto);
+    DTO update(I i, DTO dto);
+    DTO delete(I i);
 
 }

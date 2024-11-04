@@ -3,7 +3,6 @@ package dat.controllers;
 import dat.config.HibernateConfig;
 import dat.config.Populator;
 import dat.daos.DoctorDAO;
-import dat.daos.DoctorMockDAO;
 import dat.dtos.DoctorDTO;
 import dat.enums.Specialty;
 import dat.exceptions.ApiException;

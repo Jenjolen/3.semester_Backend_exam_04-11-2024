@@ -1,77 +1,115 @@
 package dat.config;
 
-import dat.dtos.DoctorDTO;
-import dat.entities.Appointment;
-import dat.entities.Doctor;
-import dat.enums.Specialty;
+
+import dat.daos.GuideDAO;
+import dat.daos.TripDAO;
+import dat.dtos.TripDTO;
+import dat.entities.Guide;
+import dat.entities.Trip;
+import dat.enums.Category;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Populator {
 
     EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
-    public void populate() {
-
-        // Doctors
-        Doctor doctor1 = new Doctor("Dr. Alice Smith", LocalDate.of(1975, 4, 12), 2000, "City Health Clinic", Specialty.FAMILY_MEDICINE);
-        Doctor doctor2 = new Doctor("Dr. Bob Johnson", LocalDate.of(1980, 8, 5), 2005, "Downtown Medical Center", Specialty.SURGERY);
-        Doctor doctor3 = new Doctor("Dr. Clara Lee", LocalDate.of(1983, 7, 22), 2008, "Green Valley Hospital", Specialty.PEDIATRICS);
-        Doctor doctor4 = new Doctor("Dr. David Park", LocalDate.of(1978, 11, 15), 2003, "Hillside Medical Practice", Specialty.PSYCHIATRY);
-        Doctor doctor5 = new Doctor("Dr. Emily White", LocalDate.of(1982, 9, 30), 2007, "Metro Health Center", Specialty.GERIATRICS);
-        Doctor doctor6 = new Doctor("Dr. Fiona Martinez", LocalDate.of(1985, 2, 17), 2010, "Riverside Wellness Clinic", Specialty.SURGERY);
-        Doctor doctor7 = new Doctor("Dr. George Kim", LocalDate.of(1979, 5, 29), 2004, "Summit Health Institute", Specialty.FAMILY_MEDICINE);
-
-        try (var em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            em.persist(doctor1);
-            em.persist(doctor2);
-            em.persist(doctor3);
-            em.persist(doctor4);
-            em.persist(doctor5);
-            em.persist(doctor6);
-            em.persist(doctor7);
-            em.getTransaction().commit();
-        }
-
-        // Appointments
-
-        Appointment appointment1 = new Appointment("Clara Jones", LocalDate.of(2021, 10, 15), LocalTime.of(10,00), "City Health Clinic", doctor1);
-        Appointment appointment2 = new Appointment("David Smith", LocalDate.of(2021, 10, 15), LocalTime.of(11,00), "City Health Clinic", doctor1);
-        Appointment appointment3 = new Appointment("Emily Brown", LocalDate.of(2023, 10, 15), LocalTime.of(12,00), "Downtown Medical Center", doctor2);
-        Appointment appointment4 = new Appointment("Fiona White", LocalDate.of(2021, 10, 15), LocalTime.of(13,00), "Downtown Medical Center", doctor2);
-        Appointment appointment5 = new Appointment("Penelope Rose", LocalDate.of(2022, 8, 22), LocalTime.of(11,00), "Green Valley Hospital", doctor3);
-        Appointment appointment6 = new Appointment("Quincy Black", LocalDate.of(2022, 8, 22), LocalTime.of(12,00), "Green Valley Hospital", doctor3);
-        Appointment appointment7 = new Appointment("Roseanne Park", LocalDate.of(2020, 4, 10), LocalTime.of(12,00), "Hillside Medical Practice", doctor4);
-        Appointment appointment8 = new Appointment("Samuel Green", LocalDate.of(2020, 4, 10), LocalTime.of(13,00), "Hillside Medical Practice", doctor4);
-        Appointment appointment9 = new Appointment("Trevor Blue", LocalDate.of(2022, 1, 5), LocalTime.of(10,00), "Metro Health Center", doctor5);
-        Appointment appointment10 = new Appointment("Ursula White", LocalDate.of(2023, 10, 5), LocalTime.of(10,00), "Metro Health Center", doctor5);
-        Appointment appointment11 = new Appointment("Violet Black", LocalDate.of(2022, 10, 5), LocalTime.of(11,00), "Riverside Wellness Clinic", doctor6);
-        Appointment appointment12 = new Appointment("Wendy Green", LocalDate.of(2022, 10, 5), LocalTime.of(12,00), "Riverside Wellness Clinic", doctor6);
-        Appointment appointment13 = new Appointment("Xander Blue", LocalDate.of(2022, 12, 20), LocalTime.of(13,00), "Summit Health Institute", doctor7);
-        Appointment appointment14 = new Appointment("Yvonne White", LocalDate.of(2023, 2, 5), LocalTime.of(14,00), "Summit Health Institute", doctor7);
-
-        try (var em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            em.persist(appointment1);
-            em.persist(appointment2);
-            em.persist(appointment3);
-            em.persist(appointment4);
-            em.persist(appointment5);
-            em.persist(appointment6);
-            em.persist(appointment7);
-            em.persist(appointment8);
-            em.persist(appointment9);
-            em.persist(appointment10);
-            em.persist(appointment11);
-            em.persist(appointment12);
-            em.persist(appointment13);
-            em.persist(appointment14);
-            em.getTransaction().commit();
-        }
+    public static void main(String[] args) {
+        Populator populator = new Populator();
+        populator.populate();
     }
 
-}
+    public void populate() {
+
+        try (EntityManager em = emf.createEntityManager()) {
+
+
+            TripDAO tripDAO = TripDAO.getInstance(emf);
+            GuideDAO guideDAO = GuideDAO.getInstance(emf);
+
+            // Adding trips to database
+
+            Trip trip1 = new Trip(LocalTime.of(10, 0), LocalTime.of(12, 0), "Budapest", "Sightseeing", 150.99, Category.CITY);
+            Trip trip2 = new Trip(LocalTime.of(14, 0), LocalTime.of(16, 0), "Balaton", "Sailing", 200.99, Category.LAKE);
+            Trip trip3 = new Trip(LocalTime.of(8, 0), LocalTime.of(20, 0), "Zakopane", "Skiing", 300.99, Category.SNOW);
+            Trip trip4 = new Trip(LocalTime.of(10, 0), LocalTime.of(15, 0), "Barcelona", "Beach", 250.99, Category.BEACH);
+            Trip trip5 = new Trip(LocalTime.of(10, 0), LocalTime.of(18, 0), "Rome", "Sightseeing", 150.99, Category.CITY);
+            Trip trip6 = new Trip(LocalTime.of(8, 0), LocalTime.of(18, 0), "Las Palmas", "Tour around Gran Canaria", 150.99, Category.SEA);
+            Trip trip7 = new Trip(LocalTime.of(10, 0), LocalTime.of(16, 0), "Tatras", "Hiking", 150.99, Category.FOREST);
+
+            em.getTransaction().begin();
+
+            em.persist(trip1);
+            em.persist(trip2);
+            em.persist(trip3);
+            em.persist(trip4);
+            em.persist(trip5);
+            em.persist(trip6);
+            em.persist(trip7);
+
+            em.getTransaction().commit();
+
+            // Adding guides to database
+
+            Guide guide1 = new Guide("Gertha", "Nerthoosen", "guidegertha@localtours", "2375790", 4);
+            Guide guide2 = new Guide("Hans", "Müller", "guidehans@globaltours", "3257880020", 2);
+            Guide guide3 = new Guide("Maria", "Garcia", "guidemaria@localtours", "9862048576", 10);
+            Guide guide4 = new Guide("Józef", "Kowalski", "guidejozef@globaltours", "3257880020", 5);
+
+            em.getTransaction().begin();
+
+            em.persist(guide1);
+            em.persist(guide2);
+            em.persist(guide3);
+            em.persist(guide4);
+
+            em.getTransaction().commit();
+
+            // Assigning guides to trips
+
+            trip1.setGuide(guide1);
+            trip2.setGuide(guide2);
+            trip3.setGuide(guide3);
+            trip4.setGuide(guide4);
+            trip5.setGuide(guide1);
+            trip6.setGuide(guide2);
+            trip7.setGuide(guide3);
+
+            guide1.setTrips(new HashSet<>(List.of(trip1, trip5)));
+            guide2.setTrips(new HashSet<>(List.of(trip2, trip6)));
+            guide3.setTrips(new HashSet<>(List.of(trip3, trip7)));
+            guide4.setTrips(new HashSet<>(List.of(trip4)));
+
+            em.getTransaction().begin();
+
+            em.merge(trip1);
+            em.merge(trip2);
+            em.merge(trip3);
+            em.merge(trip4);
+            em.merge(trip5);
+            em.merge(trip6);
+            em.merge(trip7);
+
+            em.getTransaction().commit();
+
+            em.getTransaction().begin();
+
+            em.merge(guide1);
+            em.merge(guide2);
+            em.merge(guide3);
+            em.merge(guide4);
+
+            em.getTransaction().commit();
+
+
+        }
+
+    }
+
+    }

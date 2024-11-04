@@ -2,7 +2,6 @@ package dat.routes;
 
 
 import dat.controllers.DoctorControllerDB;
-import dat.controllers.DoctorMockController;
 import io.javalin.apibuilder.EndpointGroup;
 
 import static io.javalin.apibuilder.ApiBuilder.*;

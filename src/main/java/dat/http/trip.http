@@ -1,0 +1,60 @@
+
+POST {{url}}/trips/populate
+Accept: application/json
+###
+
+
+GET {{url}}/trips
+Accept: application/json
+###
+
+GET {{url}}/trips/4
+Accept: application/json
+###
+
+
+POST {{url}}/trips
+Content-Type: application/json
+Accept: application/json
+
+{
+  "startTime": "11:00",
+
+  "endTime": "19:00",
+
+  "startPosition": "Seoul",
+
+  "name": "Hongdae Shopping",
+
+  "price": 240.59,
+
+  "category": "CITY"
+}
+###
+
+PUT {{url}}/trips/4
+Content-Type: application/json
+Accept: application/json
+
+{
+  "startTime": "21:00",
+
+  "endTime": "23:00",
+
+  "startPosition": "Reykjavik",
+
+  "name": "Spotting Northern Lights",
+
+  "price": 300.59,
+
+  "category": "FOREST"
+}
+###
+
+DELETE {{url}}/trips/4
+Accept: application/json
+###
+
+PUT {{url}}/trips/8/guides/4
+Accept: application/json
+###

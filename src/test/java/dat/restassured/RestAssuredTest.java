@@ -6,15 +6,10 @@ import dat.config.HibernateConfig;
 import dat.config.Populator;
 
 import dat.controllers.DoctorControllerDB;
-import dat.daos.DoctorDAO;
 import dat.dtos.DoctorDTO;
 import dat.entities.Appointment;
 import dat.entities.Doctor;
 import dat.enums.Specialty;
-import dat.security.controllers.SecurityController;
-import dat.security.daos.SecurityDAO;
-import dat.security.exceptions.ValidationException;
-import dk.bugelhartmann.UserDTO;
 import io.javalin.Javalin;
 import io.restassured.common.mapper.TypeRef;
 import jakarta.persistence.EntityManager;

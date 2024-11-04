@@ -1,6 +1,10 @@
 package dat.config;
 
+import dat.entities.Guide;
+import dat.entities.Trip;
 import dat.exceptions.ApiException;
+import dat.security.entities.Role;
+import dat.security.entities.User;
 import dat.utils.Utils;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.SessionFactory;
@@ -40,8 +44,10 @@ public class HibernateConfig {
 
     // TODO: IMPORTANT: Add Entity classes here for them to be registered with Hibernate
     private static void getAnnotationConfiguration(Configuration configuration) {
-        configuration.addAnnotatedClass(dat.entities.Appointment.class);
-        configuration.addAnnotatedClass(dat.entities.Doctor.class);
+        configuration.addAnnotatedClass(User.class);
+        configuration.addAnnotatedClass(Role.class);
+        configuration.addAnnotatedClass(Guide.class);
+        configuration.addAnnotatedClass(Trip.class);
     }
 
     private static EntityManagerFactory createEMF(boolean forTest) {
